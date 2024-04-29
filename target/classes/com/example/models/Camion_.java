@@ -1,0 +1,21 @@
+package com.example.models;
+
+import java.util.Calendar;
+import javax.annotation.Generated;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.StaticMetamodel;
+
+@Generated(value="EclipseLink-2.5.0.v20130507-rNA", date="2024-04-29T16:50:15")
+@StaticMetamodel(Camion.class)
+public class Camion_ { 
+
+    public static volatile SingularAttribute<Camion, Calendar> createdAt;
+    public static volatile SingularAttribute<Camion, String> marca;
+    public static volatile SingularAttribute<Camion, String> tipoCarroceria;
+    public static volatile SingularAttribute<Camion, Long> id;
+    public static volatile SingularAttribute<Camion, Double> capacidadCarga;
+    public static volatile SingularAttribute<Camion, String> modelo;
+    public static volatile SingularAttribute<Camion, Calendar> updatedAt;
+    public static volatile SingularAttribute<Camion, String> placa;
+
+}

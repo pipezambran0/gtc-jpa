@@ -1,0 +1,15 @@
+com\example\Main.class
+com\example\models\Usuario.class
+com\example\services\GTCService.class
+com\example\models\UsuarioDTO.class
+com\example\models\Camion.class
+com\example\models\CamionDTO.class
+com\example\models\SolicitudDTO.class
+com\example\models\Solicitud_.java
+com\example\models\Usuario_.java
+com\example\models\Solicitud_.class
+com\example\models\Camion_.class
+com\example\PersistenceManager.class
+com\example\models\Usuario_.class
+com\example\models\Camion_.java
+com\example\models\Solicitud.class
