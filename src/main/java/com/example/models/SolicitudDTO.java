@@ -16,6 +16,12 @@ public class SolicitudDTO {
 
     private String propietarioCarga;
 
+    private String propietarioCamion;
+
+    private String conductorCamion;
+
+    private String referenciaRemision;
+
     private String origen;
 
     private String destino;
@@ -27,6 +33,8 @@ public class SolicitudDTO {
     private double valorAsegurado;
 
     private String empaque;
+
+    private String estado;
 
     public SolicitudDTO() {
     }
@@ -93,6 +101,38 @@ public class SolicitudDTO {
 
     public void setEmpaque(String empaque) {
         this.empaque = empaque;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getPropietarioCamion() {
+        return propietarioCamion;
+    }
+
+    public void setPropietarioCamion(String propietarioCamion) {
+        this.propietarioCamion = propietarioCamion;
+    }
+
+    public String getReferenciaRemision() {
+        return referenciaRemision;
+    }
+
+    public void setReferenciaRemision(String referenciaRemision) {
+        this.referenciaRemision = referenciaRemision;
+    }
+
+    public String getConductorCamion() {
+        return conductorCamion;
+    }
+
+    public void setConductorCamion(String conductorCamion) {
+        this.conductorCamion = conductorCamion;
     }
 
 }

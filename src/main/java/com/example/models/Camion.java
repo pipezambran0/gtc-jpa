@@ -61,15 +61,22 @@ public class Camion implements Serializable {
 
     private String tipoCarroceria;
 
+    private int viajes;
+
+    private double pesoTotalTransportado;
+
+
     public Camion() {
     }
 
-    public Camion(String placaN, String marcaN, String modeloN, double capacidadCargaN, String tipoCarroceriaN) {
+    public Camion(String placaN, String marcaN, String modeloN, double capacidadCargaN, String tipoCarroceriaN, int viajesN, double pesoTotalTransportadoN ) {
         placa = placaN;
         marca = marcaN;
         modelo = modeloN;
         capacidadCarga = capacidadCargaN;
         tipoCarroceria = tipoCarroceriaN;
+        viajes = viajesN;
+        pesoTotalTransportado = pesoTotalTransportadoN; 
     }
 
     @PreUpdate
@@ -129,4 +136,21 @@ public class Camion implements Serializable {
     public void setTipoCarroceria(String tipoCarroceria) {
         this.tipoCarroceria = tipoCarroceria;
     }
+
+    public int getViajes() {
+        return viajes;
+    }
+
+    public void setViajes(int viajes) {
+        this.viajes = viajes;
+    }
+
+    public double getPesoTotalTransportado() {
+        return pesoTotalTransportado;
+    }
+
+    public void setPesoTotalTransportado(double pesoTotalTransportado) {
+        this.pesoTotalTransportado = pesoTotalTransportado;
+    }
+
 }

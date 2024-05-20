@@ -22,6 +22,10 @@ public class CamionDTO {
 
     private String tipoCarroceria;
 
+    private int viajes;
+
+    private double pesoTotalTransportado;
+
     public CamionDTO(){
 
     }
@@ -64,6 +68,22 @@ public class CamionDTO {
 
     public void setTipoCarroceria(String tipoCarroceria) {
         this.tipoCarroceria = tipoCarroceria;
+    }
+
+    public int getViajes() {
+        return viajes;
+    }
+
+    public void setViajes(int viajes) {
+        this.viajes = viajes;
+    }
+
+    public double getPesoTotalTransportado() {
+        return pesoTotalTransportado;
+    }
+
+    public void setPesoTotalTransportado(double pesoTotalTransportado) {
+        this.pesoTotalTransportado = pesoTotalTransportado;
     }
     
 }

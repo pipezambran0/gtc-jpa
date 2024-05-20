@@ -10,6 +10,8 @@ import com.example.models.Usuario;
 import com.example.models.UsuarioDTO;
 import com.example.models.Camion;
 import com.example.models.CamionDTO;
+import com.example.models.Remision;
+import com.example.models.RemisionDTO;
 import com.example.models.Solicitud;
 import com.example.models.SolicitudDTO;
 import java.util.ArrayList;
@@ -31,7 +33,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-
 
 /**
  *
@@ -55,7 +56,6 @@ public class GTCService {
     }
 
     //Servicios relacionados a los Usuarios ------------------------------------
-
     @GET
     @Path("/verUsuarios")
     @Produces(MediaType.APPLICATION_JSON)
@@ -186,7 +186,7 @@ public class GTCService {
             if (entityManager.getTransaction().isActive()) {
                 entityManager.getTransaction().rollback();
             }
-            response.put("message", "Error al editar usuario");
+            response.put("message", "Error al editar Usuario");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
         } finally {
             entityManager.clear();
@@ -195,7 +195,6 @@ public class GTCService {
     }
 
     //Servicios relacionados a los Camiones ------------------------------------
-
     @GET
     @Path("/verCamiones")
     @Produces(MediaType.APPLICATION_JSON)
@@ -216,6 +215,8 @@ public class GTCService {
         camionTmp.setModelo(camionDTO.getModelo());
         camionTmp.setCapacidadCarga(camionDTO.getCapacidadCarga());
         camionTmp.setTipoCarroceria(camionDTO.getTipoCarroceria());
+        camionTmp.setViajes(0);
+        camionTmp.setPesoTotalTransportado(0);
         try {
             entityManager.getTransaction().begin();
             entityManager.persist(camionTmp);
@@ -280,6 +281,8 @@ public class GTCService {
                 camion.setModelo(camionDTO.getModelo());
                 camion.setCapacidadCarga(camionDTO.getCapacidadCarga());
                 camion.setTipoCarroceria(camionDTO.getTipoCarroceria());
+                camion.setViajes(camionDTO.getViajes());
+                camion.setPesoTotalTransportado(camionDTO.getPesoTotalTransportado());
                 entityManager.merge(camion);
                 entityManager.getTransaction().commit();
                 response.put("message", "Camion editado correctamente");
@@ -293,7 +296,7 @@ public class GTCService {
             if (entityManager.getTransaction().isActive()) {
                 entityManager.getTransaction().rollback();
             }
-            response.put("message", "Error al editar camion");
+            response.put("message", "Error al editar Camion");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
         } finally {
             entityManager.clear();
@@ -325,6 +328,11 @@ public class GTCService {
         solicitudTmp.setPeso(solicitudDTO.getPeso());
         solicitudTmp.setValorAsegurado(solicitudDTO.getValorAsegurado());
         solicitudTmp.setEmpaque(solicitudDTO.getEmpaque());
+        solicitudTmp.setEstado(solicitudDTO.getEstado());
+        solicitudTmp.setPropietarioCamion("***");
+        solicitudTmp.setConductorCamion("+++");
+        solicitudTmp.setReferenciaRemision("---");
+
         try {
             entityManager.getTransaction().begin();
             entityManager.persist(solicitudTmp);
@@ -367,7 +375,7 @@ public class GTCService {
             if (entityManager.getTransaction().isActive()) {
                 entityManager.getTransaction().rollback();
             }
-            response.put("message", "Error al eliminar solicitud");
+            response.put("message", "Error al eliminar Solicitud");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
         } finally {
             entityManager.clear();
@@ -392,12 +400,16 @@ public class GTCService {
                 solicitud.setPeso(solicitudDTO.getPeso());
                 solicitud.setValorAsegurado(solicitudDTO.getValorAsegurado());
                 solicitud.setEmpaque(solicitudDTO.getEmpaque());
+                solicitud.setEstado(solicitudDTO.getEstado());
+                solicitud.setPropietarioCamion(solicitudDTO.getPropietarioCamion());
+                solicitud.setReferenciaRemision(solicitudDTO.getReferenciaRemision());
+
                 entityManager.merge(solicitud);
                 entityManager.getTransaction().commit();
                 response.put("message", "Solicitud editada correctamente");
                 return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(response).build();
             } else {
-                response.put("message", "Solicitud no encontrado");
+                response.put("message", "Solicitud no encontrada");
                 return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(response).build();
             }
         } catch (Exception e) {
@@ -405,7 +417,407 @@ public class GTCService {
             if (entityManager.getTransaction().isActive()) {
                 entityManager.getTransaction().rollback();
             }
-            response.put("message", "Error al editar solicitud");
+            response.put("message", "Error al editar Solicitud");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+    }
+
+    //Servicios relacionados a la remision -------------------------------------
+    @GET
+    @Path("/verRemisiones")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRemisiones() {
+        Query q = entityManager.createQuery("select u from Remision u order by u.placa ASC");
+        List<Remision> remisiones = q.getResultList();
+        return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(remisiones).build();
+    }
+
+    @POST
+    @Path("/agregarRemision")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createRemision(RemisionDTO remisionDTO) {
+        JSONObject rta = new JSONObject();
+        Remision remisionTmp = new Remision();
+        remisionTmp.setFechaRecogida(remisionDTO.getFechaRecogida());
+        remisionTmp.setHoraRecogida(remisionDTO.getHoraRecogida());
+        remisionTmp.setOrigen(remisionDTO.getOrigen());
+        remisionTmp.setDestino(remisionDTO.getDestino());
+        remisionTmp.setPlaca(remisionDTO.getPlaca());
+        remisionTmp.setConductor(remisionDTO.getConductor());
+        remisionTmp.setRuta(remisionDTO.getRuta());
+        remisionTmp.setValoracion(0);
+        try {
+            entityManager.getTransaction().begin();
+            entityManager.persist(remisionTmp);
+            entityManager.getTransaction().commit();
+            entityManager.refresh(remisionTmp);
+            rta.put("remision_id", remisionTmp.getId());
+        } catch (Throwable t) {
+            t.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            remisionTmp = null;
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+        return Response.status(200).header("Access-Control-Allow-Origin",
+                "*").entity(rta).build();
+    }
+
+    @DELETE
+    @Path("/eliminarRemision/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteRemision(@PathParam("id") Long id) throws JSONException {
+        JSONObject response = new JSONObject();
+        try {
+            entityManager.getTransaction().begin();
+            Remision remision = entityManager.find(Remision.class, id);
+            if (remision != null) {
+                entityManager.remove(remision);
+                entityManager.getTransaction().commit();
+                response.put("message", "Remision eliminada exitosamente");
+                return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            } else {
+                response.put("message", "Remision no encontrada");
+                return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            response.put("message", "Error al eliminar Remision");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+    }
+
+    @PUT
+    @Path("/editarRemision/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateRemision(@PathParam("id") Long id, RemisionDTO remisionDTO) throws JSONException {
+        JSONObject response = new JSONObject();
+        try {
+            entityManager.getTransaction().begin();
+            Remision remision = entityManager.find(Remision.class, id);
+            if (remision != null) {
+                remision.setFechaRecogida(remisionDTO.getFechaRecogida());
+                remision.setHoraRecogida(remisionDTO.getHoraRecogida());
+                remision.setOrigen(remisionDTO.getOrigen());
+                remision.setDestino(remisionDTO.getDestino());
+                remision.setPlaca(remisionDTO.getPlaca());
+                remision.setConductor(remisionDTO.getConductor());
+                remision.setRuta(remisionDTO.getRuta());
+                remision.setValoracion(remisionDTO.getValoracion());
+                entityManager.merge(remision);
+                entityManager.getTransaction().commit();
+                response.put("message", "Remision editada correctamente");
+                return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            } else {
+                response.put("message", "Remision no encontrada");
+                return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            response.put("message", "Error al editar Remision");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+    }
+
+    // BackEnd 2 ---------------------------------------------------------------
+    // Cliente - Radicación de la Solicitud ------------------------------------
+    @POST
+    @Path("/radicarSolicitud/{clienteId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response radicarSolicitud(SolicitudDTO solicitudDTO, @PathParam("clienteId") Long clienteId) {
+        JSONObject response = new JSONObject();
+        Solicitud solicitud = new Solicitud();
+        try {
+            entityManager.getTransaction().begin();
+            Usuario cliente = entityManager.find(Usuario.class, clienteId);
+            solicitud.setFecha(solicitudDTO.getFecha());
+            solicitud.setPropietarioCarga(cliente.getName() + " " + cliente.getSurname());
+            solicitud.setOrigen(solicitudDTO.getOrigen());
+            solicitud.setDestino(solicitudDTO.getDestino());
+            solicitud.setDimensiones(solicitudDTO.getDimensiones());
+            solicitud.setPeso(solicitudDTO.getPeso());
+            solicitud.setValorAsegurado(solicitudDTO.getValorAsegurado());
+            solicitud.setEmpaque(solicitudDTO.getEmpaque());
+            solicitud.setEstado("Disponible");
+            solicitud.setPropietarioCamion("***");
+            solicitud.setConductorCamion("+++");
+            solicitud.setReferenciaRemision("---");
+
+            entityManager.persist(solicitud);
+            entityManager.getTransaction().commit();
+            entityManager.refresh(solicitud);
+
+            response.put("Esta es la referencia de la solicitud: ", solicitud.getId());
+        } catch (Throwable t) {
+            t.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            solicitud = null;
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+        return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(response).build();
+    }
+
+    // Propietario - Consulta Solicitudes Disponibles --------------------------
+    @GET
+    @Path("/verSolicitudesDisponibles")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response verSolicitudesDisponibles() {
+        Query q = entityManager.createQuery("SELECT s FROM Solicitud s WHERE s.estado = 'Disponible'");
+        List<Solicitud> solicitudes = q.getResultList();
+        return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(solicitudes).build();
+    }
+
+    // Propietario - Acepta Solicitud Disponible -------------------------------
+    @POST
+    @Path("/aceptarSolicitud/{solicitudId}/{propietarioId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response aceptarSolicitud(@PathParam("solicitudId") Long solicitudId, @PathParam("propietarioId") Long propietarioId) throws JSONException {
+        JSONObject response = new JSONObject();
+        try {
+            entityManager.getTransaction().begin();
+            Solicitud solicitud = entityManager.find(Solicitud.class, solicitudId);
+            Usuario propietario = entityManager.find(Usuario.class, propietarioId);
+
+            if (solicitud != null && propietario != null) {
+                solicitud.setPropietarioCamion(propietario.getName() + " " + propietario.getSurname());
+                solicitud.setEstado("Aceptada");
+                entityManager.merge(solicitud);
+                entityManager.getTransaction().commit();
+                entityManager.refresh(solicitud);
+
+                response.put("Esta es la referencia de la solicitud aceptada: ", solicitud.getId());
+            } else {
+                response.put("message", "Solicitud o Propietario no encontrado");
+                return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            response.put("message", "Error al aceptar la solicitud");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+        return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(response).build();
+    }
+
+    // Propietario - Asigna Conductor ------------------------------------------
+    @POST
+    @Path("/asignarConductor/{solicitudId}/{conductorId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response asignarConductor(@PathParam("solicitudId") Long solicitudId, @PathParam("conductorId") Long conductorId) throws JSONException {
+        JSONObject response = new JSONObject();
+        try {
+            entityManager.getTransaction().begin();
+            Solicitud solicitud = entityManager.find(Solicitud.class, solicitudId);
+            Usuario conductor = entityManager.find(Usuario.class, conductorId);
+
+            if (solicitud != null && conductor != null) {
+                solicitud.setConductorCamion(conductor.getName() + " " + conductor.getSurname());
+                entityManager.merge(solicitud);
+                entityManager.getTransaction().commit();
+                entityManager.refresh(solicitud);
+
+                response.put("Esta es la referencia de la solicitud: ", solicitud.getId());
+            } else {
+                response.put("message", "Solicitud o Conductor no encontrado");
+                return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            response.put("message", "Error al asignar el conductor a la solicitud");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+        return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(response).build();
+    }
+
+    // Conductor - Genera la Remision ------------------------------------------
+    @POST
+    @Path("/generarRemision/{solicitudId}/{conductorId}/{camionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response generarRemision(@PathParam("solicitudId") Long solicitudId, @PathParam("conductorId") Long conductorId, @PathParam("camionId") Long camionId, RemisionDTO remisionDTO) throws JSONException {
+        JSONObject rta = new JSONObject();
+        try {
+            entityManager.getTransaction().begin();
+
+            Usuario conductor = entityManager.find(Usuario.class, conductorId);
+            Solicitud solicitud = entityManager.find(Solicitud.class, solicitudId);
+            Camion camion = entityManager.find(Camion.class, camionId);
+
+            if (conductor == null) {
+                rta.put("message", "Conductor no encontrado");
+                return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(rta).build();
+            }
+
+            if (solicitud == null) {
+                rta.put("message", "Solicitud no encontrada");
+                return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(rta).build();
+            }
+
+            Remision remisionTmp = new Remision();
+            remisionTmp.setFechaRecogida(remisionDTO.getFechaRecogida());
+            remisionTmp.setHoraRecogida(remisionDTO.getHoraRecogida());
+            remisionTmp.setOrigen(remisionDTO.getOrigen());
+            remisionTmp.setDestino(remisionDTO.getDestino());
+            remisionTmp.setPlaca(camion.getPlaca());
+            remisionTmp.setConductor(conductor.getName() + " " + conductor.getSurname());
+            remisionTmp.setRuta(remisionDTO.getRuta());
+
+            entityManager.persist(remisionTmp);
+            entityManager.getTransaction().commit();
+            entityManager.refresh(remisionTmp);
+
+            entityManager.getTransaction().begin();
+            solicitud.setReferenciaRemision(remisionTmp.getId().toString());
+            entityManager.merge(solicitud);
+            entityManager.getTransaction().commit();
+            entityManager.refresh(solicitud);
+
+            rta.put("Esta es la referencia de la remision:", remisionTmp.getId());
+        } catch (Throwable t) {
+            t.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            rta.put("message", "Error al generar la remisión");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(rta).build();
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+        return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(rta).build();
+    }
+
+    // Conductor - Cerrar Remision ---------------------------------------------
+    @PUT
+    @Path("/cerrarRemision/{remisionId}/{valoracion}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response cerrarRemision(@PathParam("remisionId") Long remisionId, @PathParam("valoracion") int valoracion) throws JSONException {
+        JSONObject response = new JSONObject();
+        try {
+            entityManager.getTransaction().begin();
+            Remision remision = entityManager.find(Remision.class, remisionId);
+
+            if (remision != null) {
+                remision.setValoracion(valoracion);
+
+                entityManager.merge(remision);
+                entityManager.getTransaction().commit();
+
+                response.put("message", "Valoracion Realizada");
+                return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            } else {
+                response.put("message", "Remisión no encontrada");
+                return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            response.put("message", "Error al cerrar la remisión y registrar la valoracion");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+    }
+
+    // Conductor - Finalizar Solicitud -----------------------------------------
+    @PUT
+    @Path("/finalizarSolicitud/{solicitudId}/{camionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response finalizarSolicitud(@PathParam("solicitudId") Long solicitudId, @PathParam("camionId") Long camionId) throws JSONException {
+        JSONObject response = new JSONObject();
+        try {
+            entityManager.getTransaction().begin();
+            Solicitud solicitud = entityManager.find(Solicitud.class, solicitudId);
+            Camion camion = entityManager.find(Camion.class, camionId);
+
+            if (solicitud != null) {
+                solicitud.setEstado("Finalizada");
+                camion.setPesoTotalTransportado(camion.getPesoTotalTransportado() + solicitud.getPeso());
+                camion.setViajes(camion.getViajes() + 1);
+                entityManager.merge(solicitud);
+                entityManager.merge(camion);
+                entityManager.getTransaction().commit();
+                response.put("message", "Solicitud finalizada correctamente");
+                return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            } else {
+                response.put("message", "Solicitud no encontrada");
+                return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            response.put("message", "Error al finalizar la solicitud");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
+        } finally {
+            entityManager.clear();
+            entityManager.close();
+        }
+    }
+
+    // Propietario - Estadisticas del Camion -----------------------------------
+    @GET
+    @Path("/estadisticasCamion/{camionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEstadisticasCamion(@PathParam("camionId") Long camionId) throws JSONException {
+        JSONObject response = new JSONObject();
+        try {
+            entityManager.getTransaction().begin();
+            Camion camion = entityManager.find(Camion.class, camionId);
+            entityManager.getTransaction().commit();
+
+            if (camion != null) {
+                response.put("placa", camion.getPlaca());
+                response.put("viajes", camion.getViajes());
+                response.put("pesoTotalTransportado", camion.getPesoTotalTransportado());
+
+                return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            } else {
+                response.put("message", "Camión no encontrado");
+                return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").entity(response).build();
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            response.put("message", "Error al obtener las estadísticas del camión");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Access-Control-Allow-Origin", "*").entity(response).build();
         } finally {
             entityManager.clear();

@@ -9,14 +9,11 @@ package com.example.models;
 import com.sun.istack.NotNull;
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Set;
-import static javax.persistence.CascadeType.ALL;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
@@ -50,6 +47,12 @@ public class Solicitud implements Serializable {
 
     private String propietarioCarga;
 
+    private String propietarioCamion;
+
+    private String conductorCamion;
+
+    private String referenciaRemision;
+
     private String origen;
 
     private String destino;
@@ -62,18 +65,24 @@ public class Solicitud implements Serializable {
 
     private String empaque;
 
+    private String estado;
+
     public Solicitud() {
     }
 
-    public Solicitud(String fechaN, String propietarioCargaN, String origenN, String destinoN, String dimensionesN, double pesoN, double valorAseguradoN, String empaqueN) {
+    public Solicitud(String fechaN, String propietarioCargaN, String propietarioCamionN, String conductorCamionN, String referenciaRemisionN, String origenN, String destinoN, String dimensionesN, double pesoN, double valorAseguradoN, String empaqueN, String estadoN) {
         fecha = fechaN;
         propietarioCarga = propietarioCargaN;
+        propietarioCamion = propietarioCamionN;
+        conductorCamion = conductorCamionN;
+        referenciaRemision = referenciaRemisionN;
         origen = origenN;
         destino = destinoN;
         dimensiones = dimensionesN;
         peso = pesoN;
         valorAsegurado = valorAseguradoN;
         empaque = empaqueN;
+        estado = estadoN;
     }
 
     @PreUpdate
@@ -157,4 +166,37 @@ public class Solicitud implements Serializable {
     public void setEmpaque(String empaque) {
         this.empaque = empaque;
     }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getPropietarioCamion() {
+        return propietarioCamion;
+    }
+
+    public void setPropietarioCamion(String propietarioCamion) {
+        this.propietarioCamion = propietarioCamion;
+    }
+
+    public String getReferenciaRemision() {
+        return referenciaRemision;
+    }
+
+    public void setReferenciaRemision(String referenciaRemision) {
+        this.referenciaRemision = referenciaRemision;
+    }
+
+    public String getConductorCamion() {
+        return conductorCamion;
+    }
+
+    public void setConductorCamion(String conductorCamion) {
+        this.conductorCamion = conductorCamion;
+    }
+
 }

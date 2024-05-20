@@ -1,3 +1,4 @@
+com\example\models\Remision.class
 com\example\Main.class
 com\example\models\Usuario.class
 com\example\services\GTCService.class
@@ -13,3 +14,6 @@ com\example\PersistenceManager.class
 com\example\models\Usuario_.class
 com\example\models\Camion_.java
 com\example\models\Solicitud.class
+com\example\models\Remision_.class
+com\example\models\RemisionDTO.class
+com\example\models\Remision_.java
